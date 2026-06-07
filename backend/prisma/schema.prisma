@@ -1,0 +1,98 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  name          String
+  email         String   @unique
+  password_hash String
+  role          String   @default("pharmacist")
+  sales         Sale[]
+}
+
+model Supplier {
+  id        Int        @id @default(autoincrement())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  batches   MedicineBatch[]
+  purchases Purchase[]
+}
+
+model Medicine {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  brand               String?
+  category            String?
+  unit                String?
+  low_stock_threshold Int      @default(10)
+  batches             MedicineBatch[]
+  purchaseItems       PurchaseItem[]
+}
+
+model MedicineBatch {
+  id             Int      @id @default(autoincrement())
+  medicine_id    Int
+  batch_number   String
+  quantity       Int
+  purchase_price Float
+  selling_price  Float
+  expiry_date    DateTime
+  supplier_id    Int?
+
+  medicine       Medicine  @relation(fields: [medicine_id], references: [id])
+  supplier       Supplier? @relation(fields: [supplier_id], references: [id])
+  saleItems      SaleItem[]
+}
+
+model Sale {
+  id           Int      @id @default(autoincrement())
+  sale_date    DateTime @default(now())
+  total_amount Float
+  created_by   Int
+  user         User     @relation(fields: [created_by], references: [id])
+  saleItems    SaleItem[]
+}
+
+model SaleItem {
+  id                Int           @id @default(autoincrement())
+  sale_id           Int
+  medicine_batch_id Int
+  quantity          Int
+  price             Float
+  subtotal          Float
+
+  sale              Sale          @relation(fields: [sale_id], references: [id])
+  medicineBatch     MedicineBatch @relation(fields: [medicine_batch_id], references: [id])
+}
+
+model Purchase {
+  id            Int            @id @default(autoincrement())
+  supplier_id   Int
+  purchase_date DateTime       @default(now())
+  total_amount  Float
+
+  supplier      Supplier       @relation(fields: [supplier_id], references: [id])
+  purchaseItems PurchaseItem[]
+}
+
+model PurchaseItem {
+  id             Int      @id @default(autoincrement())
+  purchase_id    Int
+  medicine_id    Int
+  batch_number   String
+  quantity       Int
+  purchase_price Float
+  selling_price  Float
+  expiry_date    DateTime
+
+  purchase       Purchase @relation(fields: [purchase_id], references: [id])
+  medicine       Medicine @relation(fields: [medicine_id], references: [id])
+}
