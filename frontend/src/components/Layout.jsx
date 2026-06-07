@@ -13,7 +13,7 @@ const Layout = ({ children }) => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Medicines', path: '/medicines', icon: Pill },
     { name: 'Batches/Stock', path: '/batches', icon: PackagePlus },
     { name: 'Sales', path: '/sales', icon: ShoppingCart },

@@ -1,89 +1,123 @@
 import { useState, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Pill } from 'lucide-react';
+import { Pill, Eye, EyeOff } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     try {
       await login(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      setError('Invalid email or password. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-          <div className="bg-blue-600 p-3 rounded-xl shadow-lg">
-            <Pill className="h-10 w-10 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex flex-col">
+      {/* Navbar */}
+      <nav className="flex items-center justify-between px-8 py-4">
+        <Link to="/" className="flex items-center space-x-2">
+          <div className="bg-blue-600 p-2 rounded-xl">
+            <Pill className="h-5 w-5 text-white" />
           </div>
-        </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-slate-900">
-          PharmaTrack
-        </h2>
-        <p className="mt-2 text-center text-sm text-slate-600">
-          Sign in to your account
+          <span className="text-xl font-bold text-slate-900">PharmaTrack</span>
+        </Link>
+        <p className="text-sm text-slate-500">
+          Don't have an account?{' '}
+          <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+            Sign Up
+          </Link>
         </p>
-      </div>
+      </nav>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-slate-100">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {error && (
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded-md">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
-            
-            <div>
-              <label className="block text-sm font-medium text-slate-700">
-                Email address
-              </label>
-              <div className="mt-1">
+      {/* Form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-extrabold text-slate-900">Welcome back!</h1>
+            <p className="mt-2 text-slate-500">Log in to your PharmaTrack account</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-100 p-8">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Email address
+                </label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="you@pharmacy.com"
+                  className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 />
               </div>
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-700">
-                Password
-              </label>
-              <div className="mt-1">
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                />
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-sm font-medium text-slate-700">
+                    Password
+                  </label>
+                  <Link to="/forgot-password" className="text-xs text-blue-600 hover:underline font-medium">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your password"
+                    className="w-full px-4 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                disabled={loading}
+                className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                Sign in
+                {loading ? 'Logging in...' : 'Log In'}
               </button>
-            </div>
-          </form>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Don't have an account?{' '}
+              <Link to="/register" className="text-blue-600 font-semibold hover:underline">
+                Create one for free
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
     </div>
